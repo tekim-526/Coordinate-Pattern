@@ -14,7 +14,9 @@ protocol Coordinator : AnyObject {
     func start()
 }
 
-class AppCoordinator: Coordinator, LoginCoordinatorDelegate {
+class AppCoordinator: Coordinator, LoginCoordinatorDelegate, MainCoordinatorDelegate {
+    
+    
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     var isLoggedIn: Bool = false
@@ -31,7 +33,10 @@ class AppCoordinator: Coordinator, LoginCoordinatorDelegate {
         }
     }
     func showMainViewController() {
-        
+        let coordinator = MainCoordinator(navigationController: self.navigationController)
+        coordinator.delegate = self
+        coordinator.start()
+        self.childCoordinators.append(coordinator)
     }
     func showLoginViewController() {
         let coordinator = LoginCoordinator(navigationController: self.navigationController)
@@ -42,6 +47,10 @@ class AppCoordinator: Coordinator, LoginCoordinatorDelegate {
     func didLoggedIn(_ coordinator: LoginCoordinator) {
         self.childCoordinators = self.childCoordinators.filter { $0 !== coordinator }
         self.showMainViewController()
+    }
+    func didLoggedOut(_ coordinator: MainCoordinator) {
+        self.childCoordinators = self.childCoordinators.filter { $0 !== coordinator }
+        self.showLoginViewController()
     }
 }
 
